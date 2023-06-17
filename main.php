@@ -154,6 +154,11 @@ class Employee
 	{
 		return $this->labours;
 	}
+
+	public function update_labours(\API\DataSet\Labours $labours)
+	{
+		$this->labours = $labours;
+	}
 }
 
 namespace API\Export;
@@ -182,6 +187,12 @@ class Employees
 		return $this->employees[$id];
 	}
 
+	public function update_employee(\Data\Employee $e)
+	{
+		//TODO: add validation
+		$this->employees[$e->get_id()] = $e;
+	}
+
 	public function puchClock(\Data\Clock $clock)
 	{
 		if (!array_key_exists($clock->get_id(), $this->employees)) {
@@ -193,12 +204,12 @@ class Employees
 		$clocks->add_clock($clock);
 		//update labour records
 		$labours = $employee->get_labours();
-		$this->filling_working_seconds_to_timeslot($labours, $clock);
-
-		//filling labour information
+		$labours = $this->filling_working_seconds_to_timeslot($labours, $clock);
+		$employee->update_labours($labours);
+		$this->update_employee($employee);
 	}
 
-	private function filling_working_seconds_to_timeslot(\API\DataSet\Labours $labours, \Data\Clock $clock)
+	private function filling_working_seconds_to_timeslot(\API\DataSet\Labours $labours, \Data\Clock $clock): \API\DataSet\Labours
 	{
 		//0-23 hours
 		$timeslot = [];
@@ -249,7 +260,10 @@ class Employees
 			//update labour and dataset
 			$tmpLabourDate->update_timeslot($tmpHourInt, $secs);
 			$labours->update_labour_date($tmpLabourDate);
+
 		}
+
+		return $labours;
 	}
 
 	public function search(int $id)
@@ -330,7 +344,7 @@ class Test
 		#import data 
 		$employeeDataSet = self::init_employees($dataSource['employees']);
 		$employeeDataSet = self::init_clocks($employeeDataSet, $dataSource['clocks']);
-		// print_r($employeeDataSet->getAllEmployee());
+		print_r($employeeDataSet->getAllEmployee());
 	}
 
 	static function init_employees(array $employees): \API\DataSet\Employees
