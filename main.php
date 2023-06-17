@@ -206,10 +206,10 @@ class Employees
 		//interal hour between in and out 
 		$in = $clock->get_in_time();
 		$out = $clock->get_out_time();
-		$inHourInt = intval($in->format("h")); //int type for comparison
-		$outHourInt = intval($out->format("h"));
-		$head = new \DateTime($in->format("Y-m-d h:00:00"));
-		$tail = new \DateTime($out->format("Y-m-d h:00:00"));
+		$inHourInt = intval($in->format("G")); //24hour format and cast to int type for comparison
+		$outHourInt = intval($out->format("G"));
+		$head = new \DateTime($in->format("Y-m-d H:00:00"));
+		$tail = new \DateTime($out->format("Y-m-d H:00:00"));
 		$tail->modify("+1 hour"); //need to add extra hour to tail for interation
 
 		//interate hourly betwen in and out
@@ -217,7 +217,7 @@ class Employees
 		$tmpLabourDate = null; //a cache obj
 		foreach($hourly as $timeslot) {
 			$tmpDateString = $timeslot->format("Y-m-d");
-			$tmpHourInt = intval($timeslot->format("h"));
+			$tmpHourInt = intval($timeslot->format("G")); //24 hour format without leading 0
 
 			//get labour cache obj
 			if (!$tmpLabourDate || $tmpLabourDate->get_date() !== $tmpDateString) {
