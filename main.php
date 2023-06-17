@@ -448,12 +448,12 @@ $test = new Test();
 $test->setup("apertureLabsClocks.json");
 $data = $test->employeeDataSet->search(0);
 $test->employeeDataSet->export_to_json("labour_hours_employee_0.json", $data->to_array());
-// $data = $test->employeeDataSet->search(1);
-// $test->employeeDataSet->export_to_json("labour_hours_employee_1.json", $data->to_array());
-// $data = $test->employeeDataSet->search(2);
-// $test->employeeDataSet->export_to_json("labour_hours_employee_2.json", $data->to_array());
-// $data = $test->employeeDataSet->search(3);
-// $test->employeeDataSet->export_to_json("labour_hours_employee_3.json", $data->to_array());
+$data = $test->employeeDataSet->search(1);
+$test->employeeDataSet->export_to_json("labour_hours_employee_1.json", $data->to_array());
+$data = $test->employeeDataSet->search(2);
+$test->employeeDataSet->export_to_json("labour_hours_employee_2.json", $data->to_array());
+$data = $test->employeeDataSet->search(3);
+$test->employeeDataSet->export_to_json("labour_hours_employee_3.json", $data->to_array());
 
 exit;
 //test case: peroid 4

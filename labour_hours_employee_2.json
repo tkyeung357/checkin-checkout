@@ -1,0 +1,27 @@
+{
+    "employee_id": 2,
+    "first_name": "Doug",
+    "last_name": "Rattmann",
+    "labour": [
+        {
+            "date": "2017-02-04",
+            "total": 4.5,
+            "labour_by_time_period": {
+                "period1": 0,
+                "period2": 0,
+                "period3": 3.5,
+                "period4": 1
+            }
+        },
+        {
+            "date": "2017-02-05",
+            "total": 3.1,
+            "labour_by_time_period": {
+                "period1": 0,
+                "period2": 0,
+                "period3": 0,
+                "period4": 3.1
+            }
+        }
+    ]
+}

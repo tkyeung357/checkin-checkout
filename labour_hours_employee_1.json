@@ -1,0 +1,27 @@
+{
+    "employee_id": 1,
+    "first_name": "Chell",
+    "last_name": "Johnson",
+    "labour": [
+        {
+            "date": "2017-02-07",
+            "total": 4.8,
+            "labour_by_time_period": {
+                "period1": 1.9,
+                "period2": 2.8,
+                "period3": 0,
+                "period4": 0
+            }
+        },
+        {
+            "date": "2017-02-04",
+            "total": 10.6,
+            "labour_by_time_period": {
+                "period1": 2.8,
+                "period2": 5.5,
+                "period3": 2.3,
+                "period4": 0
+            }
+        }
+    ]
+}

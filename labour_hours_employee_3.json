@@ -1,0 +1,27 @@
+{
+    "employee_id": 3,
+    "first_name": "GLaDOS",
+    "last_name": null,
+    "labour": [
+        {
+            "date": "2012-11-12",
+            "total": 24,
+            "labour_by_time_period": {
+                "period1": 7,
+                "period2": 6,
+                "period3": 5,
+                "period4": 5
+            }
+        },
+        {
+            "date": "2012-11-13",
+            "total": 24,
+            "labour_by_time_period": {
+                "period1": 7,
+                "period2": 6,
+                "period3": 5,
+                "period4": 5
+            }
+        }
+    ]
+}

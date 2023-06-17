@@ -1,0 +1,17 @@
+{
+    "employee_id": 0,
+    "first_name": "Cave",
+    "last_name": "Johnson",
+    "labour": [
+        {
+            "date": "1953-07-20",
+            "total": 5.8,
+            "labour_by_time_period": {
+                "period1": 3,
+                "period2": 2.8,
+                "period3": 0,
+                "period4": 0
+            }
+        }
+    ]
+}
