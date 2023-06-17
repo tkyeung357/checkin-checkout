@@ -219,6 +219,8 @@ class Employees
 		$out = $clock->get_out_time();
 		$inHourInt = intval($in->format("G")); //24hour format and cast to int type for comparison
 		$outHourInt = intval($out->format("G"));
+		$inDateString = $in->format("Y-m-d");
+		$outDateString = $out->format("Y-m-d");
 		$head = new \DateTime($in->format("Y-m-d H:00:00"));
 		$tail = new \DateTime($out->format("Y-m-d H:00:00"));
 		$tail->modify("+1 hour"); //need to add extra hour to tail for interation
@@ -243,11 +245,11 @@ class Employees
 			//calculate working time (seconds)
 			$headDiff = $timeslot->diff($in);
 			$tailDiff = $timeslot->diff($out);
-			if ($inHourInt == $tmpHourInt) {
+			if ($inDateString == $tmpDateString && $inHourInt == $tmpHourInt) {
 				//first hour, we need to substract diff
 				print_r($timeslot->format("Y-m-d h:i:s"));
 				$secs = 3600 - $headDiff->i * 60 + $headDiff->s;
-			} elseif ($outHourInt == $tmpHourInt) {
+			} elseif ($outDateString == $tmpDateString && $outHourInt == $tmpHourInt) {
 				//last hour, we need to add diff
 				print_r($timeslot->format("Y-m-d h:i:s"));
 				$secs = $tailDiff->i * 60 + $tailDiff->s;
