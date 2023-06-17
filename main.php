@@ -110,6 +110,27 @@ class Labour
 		$this->period4 += array_sum(array_slice($timeslot, 0, 4));
 
 	}
+
+	public function to_array(): array
+	{
+		//TODO: shoud use interface to handle output format
+		return [
+			"date" => $this->date,
+			"total" => Labour::seconds_to_hours($this->total),
+			"labour_by_time_period" => [
+				"period1" => Labour::seconds_to_hours($this->period1),
+				"period2" => Labour::seconds_to_hours($this->period2),
+				"period3" => Labour::seconds_to_hours($this->period3),
+				"period4" => Labour::seconds_to_hours($this->period4),
+			]
+		];
+	}
+
+	//support hours only
+	static function seconds_to_hours(int $secs)
+	{
+		return round($secs / 3600, 1);
+	}
 }
 
 namespace Data;
@@ -183,13 +204,15 @@ class Employee
 	{
 		$this->labours = $labours;
 	}
-}
 
-namespace API\Export;
-class Employee
+	public function to_array(): array
 {
-	public function export(int $id)
-	{
+		return [
+			"employee_id" => $this->id,
+			"first_name" => $this->first_name,
+			"last_name" => $this->last_name,
+			"labour" => $this->labours->to_array(),
+		];
 	}
 }
 
@@ -297,7 +320,12 @@ class Employees
 	{
 	}
 
-	public function getAllEmployee()
+	public function export_to_json($fileName, array $data)
+	{
+		//TODO: validation
+		//it is ok to pretty print for interview test
+		return file_put_contents($fileName, json_encode($data, JSON_PRETTY_PRINT));
+	}
 	{
 		return $this->employees;
 	}
@@ -349,17 +377,16 @@ class Labours
 		return $this->labours[$date];
 	}
 
+	public function to_array(): array
+	{
+		$tmp = [];
+		foreach ($this->labours as $l) {
+			$tmp[] = $l->to_array();
 }
 
-namespace API\Search;
-class Employee
-{
-	public function __construct()
-	{
+		return $tmp;
 	}
-	public function search(int $id)
-	{
-	}
+
 }
 
 namespace Test;
