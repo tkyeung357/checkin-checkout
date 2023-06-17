@@ -25,11 +25,13 @@
 	Assumptions: 
 		1. one to many relationship between 2 objects 
 		2. no time overlap for same employee
-		3. time sensitive to calculate working period 
-			- period1: 5:00:00 - 12:00:00
-			- period2: 12:00:00 - 18:00:00
-			- period3: 18:00:00 - 23:00:00
-			- period4: 23:00:00 - 5:00:00
+		3. working peroid hours for calculate working period 
+			- period1: 5:00:00 - 12:00:00 (7hours)
+			- period2: 12:00:00 - 18:00:00 (6hours)
+			- period3: 18:00:00 - 23:00:00 (5hours)
+			- period4: 23:00:00 - 5:00:00 (today: 1hour, tomorrow: 5)
+		4. time insensitive calculation. 
+			- return rounded hour with 1 decimal place.  2.98 hour = 3hour
 	use cases:
 		1. support multiple working day
 		2. working day calculation:  use before and after day to calculate 
@@ -37,7 +39,7 @@
 
 	- user story (simulating real world time punch flow)
 		- given an employee
-		- the employee go to punch the clock (ok, this is not real world flow, because we punch in and out at same time.)
+		- when employee go to punch the clock (ok, this is not real world flow, because we punch in and out at same time.)
 		- then the Labour API receilve the clock and allocate to the timeslot with working time (seconds)
 */
 
