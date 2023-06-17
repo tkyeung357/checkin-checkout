@@ -1,0 +1,16 @@
+{
+  "employees": [
+    {
+      "id": 1,
+      "first_name": "Tim",
+      "last_name": "Yeung - period1"
+    }
+  ],
+  "clocks": [
+    {
+      "employee_id": 1,
+      "clock_in_datetime": "2023-06-16 05:00:00",
+      "clock_out_datetime": "2023-06-16 12:00:00"
+    }
+  ]
+}
