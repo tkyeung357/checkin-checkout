@@ -74,6 +74,16 @@ class Labour
 		return $this->date;
 	}
 
+	public function get_total(): int
+	{
+		return $this->total;
+	}
+
+	public function get_timeslot(): array
+	{
+		return $this->timeslot;
+	}
+
 	public function update_timeslot(int $hours, $total_seconds)
 	{
 		// if (array_key_exists($hours, $this->timeslot)) {
@@ -206,7 +216,7 @@ class Employee
 	}
 
 	public function to_array(): array
-{
+	{
 		return [
 			"employee_id" => $this->id,
 			"first_name" => $this->first_name,
@@ -220,7 +230,7 @@ namespace API\DataSet;
 class Employees
 {
 	private $employees = [];
-	public function addEmployee(\Data\Employee $e)
+	public function add_employee(\Data\Employee $e)
 	{
 		if (!array_key_exists($e->get_id(), $this->employees)) {
 			//new employee 
@@ -240,7 +250,7 @@ class Employees
 		$this->employees[$e->get_id()] = $e;
 	}
 
-	public function puchClock(\Data\Clock $clock)
+	public function puch_clock(\Data\Clock $clock)
 	{
 		if (!array_key_exists($clock->get_id(), $this->employees)) {
 			throw new \Exception ("employee not found");
@@ -294,15 +304,12 @@ class Employees
 			$tailDiff = $timeslot->diff($out);
 			if ($inDateString == $tmpDateString && $inHourInt == $tmpHourInt) {
 				//first hour, we need to substract diff
-				print_r($timeslot->format("Y-m-d h:i:s"));
 				$secs = 3600 - $headDiff->i * 60 + $headDiff->s;
 			} elseif ($outDateString == $tmpDateString && $outHourInt == $tmpHourInt) {
 				//last hour, we need to add diff
-				print_r($timeslot->format("Y-m-d h:i:s"));
 				$secs = $tailDiff->i * 60 + $tailDiff->s;
 			} else {
 				//middle hour, full hour working time
-				print_r($timeslot->format("Y-m-d h:i:s"));
 				$secs = 3600;
 			}
 				
@@ -316,8 +323,14 @@ class Employees
 		return $labours;
 	}
 
-	public function search(int $id)
+	public function search(int $id): \Data\Employee|null
 	{
+		$employee = $this->get_employee($id);
+		if (!$employee) {
+			return null;
+		}
+
+		return $employee;
 	}
 
 	public function export_to_json($fileName, array $data)
@@ -326,6 +339,8 @@ class Employees
 		//it is ok to pretty print for interview test
 		return file_put_contents($fileName, json_encode($data, JSON_PRETTY_PRINT));
 	}
+
+	public function get_all_employee()
 	{
 		return $this->employees;
 	}
@@ -382,7 +397,7 @@ class Labours
 		$tmp = [];
 		foreach ($this->labours as $l) {
 			$tmp[] = $l->to_array();
-}
+		}
 
 		return $tmp;
 	}
@@ -392,40 +407,92 @@ class Labours
 namespace Test;
 class Test
 {
-	static public function main()
+	public $employeeDataSet;
+	public function setup($fileName)
 	{
-		$dataSource = json_decode(file_get_contents("test_data.json"), true);
+		//TODO: validation
+		$dataSource = json_decode(file_get_contents($fileName), true);
 		#import data 
 		$employeeDataSet = self::init_employees($dataSource['employees']);
 		$employeeDataSet = self::init_clocks($employeeDataSet, $dataSource['clocks']);
-		print_r($employeeDataSet->getAllEmployee());
+		$this->employeeDataSet = $employeeDataSet;
 	}
 
-	static function init_employees(array $employees): \API\DataSet\Employees
+	private function init_employees(array $employees): \API\DataSet\Employees
 	{
 		$employeeDataSet = new \API\DataSet\Employees();
 		foreach($employees as $e) {
 			$tmpLabours = new \API\DataSet\Labours();  
 			$tmpClocks = new \API\DataSet\Clocks();
 			$tmpEmployee = new \Data\Employee($e["id"], $e["first_name"], $e["last_name"], $tmpClocks, $tmpLabours);
-			$employeeDataSet->addEmployee($tmpEmployee);
+			$employeeDataSet->add_employee($tmpEmployee);
 		}
 
 		return $employeeDataSet;
 	}
 
-	static function init_clocks(\API\DataSet\Employees $employees, array $clocks): \API\DataSet\Employees
+	private function init_clocks(\API\DataSet\Employees $employees, array $clocks): \API\DataSet\Employees
 	{
 		foreach($clocks as $c) {
 			$in = new \DateTime($c["clock_in_datetime"]);
 			$out = new \DateTime($c["clock_out_datetime"]);
 			$tmpClock = new \Data\Clock($c["employee_id"], $in, $out);
-			$employees->puchClock($tmpClock);
+			$employees->puch_clock($tmpClock);
 		}
 
 		return $employees;
 	}
-
 }
 
-Test::main();
+$test = new Test();
+$test->setup("apertureLabsClocks.json");
+$data = $test->employeeDataSet->search(0);
+$test->employeeDataSet->export_to_json("labour_hours_employee_0.json", $data->to_array());
+// $data = $test->employeeDataSet->search(1);
+// $test->employeeDataSet->export_to_json("labour_hours_employee_1.json", $data->to_array());
+// $data = $test->employeeDataSet->search(2);
+// $test->employeeDataSet->export_to_json("labour_hours_employee_2.json", $data->to_array());
+// $data = $test->employeeDataSet->search(3);
+// $test->employeeDataSet->export_to_json("labour_hours_employee_3.json", $data->to_array());
+
+exit;
+//test case: peroid 4
+$test->setup("test_case_period_4.json");
+$data = $test->employeeDataSet->search(1);
+$labours = $data->get_labours();
+
+//check today's working time and timeslot
+$today = new \DateTime("2023-06-16 00:00:00");
+$date = $labours->get_labour_date($today);
+$todayTimeslot = $date->get_timeslot();
+if ($date->get_total() == 3600) {
+	print_r("period4 - today total working time correct\n");
+}
+if ($todayTimeslot[22] == 0 && $todayTimeslot[23] == 3600) {
+	print_r("period4 - today time slot correct\n");
+}
+
+//check tomorrow's working time and timeslot
+$tomorrow = new \DateTime("2023-06-17 00:00:00");
+$date = $labours->get_labour_date($tomorrow);
+$todayTimeslot = $date->get_timeslot();
+if ($date->get_total() == 3600 * 5) {
+	print_r("period4 - tomorrow total working time correct\n");
+}
+if ($todayTimeslot[4] == 3600 && $todayTimeslot[5] == 0) {
+	print_r("period4 - tomorrow time slot correct\n");
+}
+
+//test case period 1
+$test->setup("test_case_period_1.json");
+$data = $test->employeeDataSet->search(1);
+$labours = $data->get_labours();
+$today = new \DateTime("2023-06-16 00:00:00");
+$date = $labours->get_labour_date($today);
+$todayTimeslot = $date->get_timeslot();
+if ($date->get_total() == 3600 * 7) {
+	print_r("period1 - today total working time correct\n");
+}
+if ($todayTimeslot[5] == 3600 && $todayTimeslot[11] == 3600) {
+	print_r("period1 - today time slot correct\n");
+}
