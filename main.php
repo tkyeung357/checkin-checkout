@@ -67,16 +67,16 @@ class Labour
 
 	}
 
-	public function get_date()
+	public function get_date(): string
 	{
 		return $this->date;
 	}
 
-	public function add_timeslot($hours, $total_seconds)
+	public function update_timeslot(int $hours, $total_seconds)
 	{
-		if (array_key_exists($hours, $this->timeslot)) {
-			throw new \Exception ("invalid timeslot");
-		}
+		// if (array_key_exists($hours, $this->timeslot)) {
+		// 	throw new \Exception ("invalid timeslot");
+		// }
 		$tmp = $this->timeslot[$hours] + $total_seconds;
 
 		if ($tmp > 3600) {
@@ -105,6 +105,16 @@ class Clock
 	public function get_id()
 	{
 		return $this->id;
+	}
+
+	public function get_in_time():\DateTime
+	{
+		return $this->in;
+	}
+
+	public function get_out_time():\DateTime
+	{
+		return $this->out;
 	}
 }
 
@@ -162,7 +172,7 @@ class Employees
 	{
 		if (!array_key_exists($e->get_id(), $this->employees)) {
 			//new employee 
-			$this->employees[] = $e;
+			$this->employees[$e->get_id()] = $e;
 		}
 
 	}
@@ -183,6 +193,63 @@ class Employees
 		$clocks->add_clock($clock);
 		//update labour records
 		$labours = $employee->get_labours();
+		$this->filling_working_seconds_to_timeslot($labours, $clock);
+
+		//filling labour information
+	}
+
+	private function filling_working_seconds_to_timeslot(\API\DataSet\Labours $labours, \Data\Clock $clock)
+	{
+		//0-23 hours
+		$timeslot = [];
+		//filling working seconds to timeslot
+		//interal hour between in and out 
+		$in = $clock->get_in_time();
+		$out = $clock->get_out_time();
+		$inHourInt = intval($in->format("h")); //int type for comparison
+		$outHourInt = intval($out->format("h"));
+		$head = new \DateTime($in->format("Y-m-d h:00:00"));
+		$tail = new \DateTime($out->format("Y-m-d h:00:00"));
+		$tail->modify("+1 hour"); //need to add extra hour to tail for interation
+
+		//interate hourly betwen in and out
+		$hourly = new \DatePeriod($head, new \DateInterval("PT1H"), $tail);
+		$tmpLabourDate = null; //a cache obj
+		foreach($hourly as $timeslot) {
+			$tmpDateString = $timeslot->format("Y-m-d");
+			$tmpHourInt = intval($timeslot->format("h"));
+
+			//get labour cache obj
+			if (!$tmpLabourDate || $tmpLabourDate->get_date() !== $tmpDateString) {
+				//cache not found or different date found.
+				$tmpLabourDate = $labours->get_labour_date($timeslot);
+				if (!$tmpLabourDate) {
+					//create new labour date
+					$tmpLabourDate = $labours->update_labour_date(new \Data\Labour($timeslot));
+				}
+			}
+
+			//calculate working time (seconds)
+			$headDiff = $timeslot->diff($in);
+			$tailDiff = $timeslot->diff($out);
+			if ($inHourInt == $tmpHourInt) {
+				//first hour, we need to substract diff
+				print_r($timeslot->format("Y-m-d h:i:s"));
+				$secs = 3600 - $headDiff->i * 60 + $headDiff->s;
+			} elseif ($outHourInt == $tmpHourInt) {
+				//last hour, we need to add diff
+				print_r($timeslot->format("Y-m-d h:i:s"));
+				$secs = $tailDiff->i * 60 + $tailDiff->s;
+			} else {
+				//middle hour, full hour working time
+				print_r($timeslot->format("Y-m-d h:i:s"));
+				$secs = 3600;
+			}
+				
+			//update labour and dataset
+			$tmpLabourDate->update_timeslot($tmpHourInt, $secs);
+			$labours->update_labour_date($tmpLabourDate);
+		}
 	}
 
 	public function search(int $id)
@@ -226,6 +293,8 @@ class Labours
 		$date = $l->get_date();
 
 		$this->labours[$date] = $l;
+
+		return $l;
 	}
 
 
@@ -233,7 +302,7 @@ class Labours
 	{
 		$date = $d->format("Y-m-d"); 
 		if (!array_key_exists($date, $this->labours)) {
-			throw new \Exception ("labour date not found");
+			return null;
 		}
 
 		return $this->labours[$date];
@@ -261,7 +330,7 @@ class Test
 		#import data 
 		$employeeDataSet = self::init_employees($dataSource['employees']);
 		$employeeDataSet = self::init_clocks($employeeDataSet, $dataSource['clocks']);
-		print_r($employeeDataSet->getAllEmployee());
+		// print_r($employeeDataSet->getAllEmployee());
 	}
 
 	static function init_employees(array $employees): \API\DataSet\Employees
