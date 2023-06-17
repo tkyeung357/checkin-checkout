@@ -88,6 +88,28 @@ class Labour
 
 		$this->timeslot[$hours] = $tmp;
 	}
+
+	public function update_working_time()
+	{
+		$timeslot = $this->timeslot;
+		$this->total = array_sum($this->timeslot);
+		// 3. working peroid hours for calculate working period 
+		// 	- period1: 5:00:00 - 12:00:00 (7hours)
+		// 	- period2: 12:00:00 - 18:00:00 (6hours)
+		// 	- period3: 18:00:00 - 23:00:00 (5hours)
+		// 	- period4: 23:00:00 - 5:00:00 (today: 1hour, tomorrow: 5)
+
+		// period1: timeslot 5 - 11
+		$this->period1 = array_sum(array_slice($timeslot, 5, 7));
+		// period2: timeslot 12 - 17
+		$this->period2 = array_sum(array_slice($timeslot, 12, 6));
+		// period3: 18 - 21
+		$this->period3 = array_sum(array_slice($timeslot, 18, 5));
+		// period4: 23
+		$this->period4 = array_sum(array_slice($timeslot, 23, 1));
+		$this->period4 += array_sum(array_slice($timeslot, 0, 4));
+
+	}
 }
 
 namespace Data;
@@ -263,6 +285,7 @@ class Employees
 				
 			//update labour and dataset
 			$tmpLabourDate->update_timeslot($tmpHourInt, $secs);
+			$tmpLabourDate->update_working_time();
 			$labours->update_labour_date($tmpLabourDate);
 
 		}
